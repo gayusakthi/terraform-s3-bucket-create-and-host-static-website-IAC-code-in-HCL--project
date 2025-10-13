@@ -9,7 +9,7 @@ pipeline {
    
         stage ('terraform apply & init') {
             steps {
-                withAWS(credentials: 'aws-cred-rajesh', region: 'eu-north-1') {
+                withAWS(credentials: 'my key', region: 'ap-south-1') {
                     sh 'terraform init'
                     sh 'terraform validate'
                     sh 'terraform apply -auto-approve'
