@@ -12,7 +12,7 @@ terraform {
 }
 
 provider "aws" {
-    region = "eu-north-1"
+    region = "ap-south-1"
 }
 resource "random_id" "rand_id" {
     byte_length= 8
@@ -20,8 +20,8 @@ resource "random_id" "rand_id" {
 }
 
 resource "aws_s3_bucket" "demo_bucket" {
-    bucket="raj-${random_id.rand_id.hex}"
-    region="eu-north-1"
+    bucket="gayathri-${random_id.rand_id.hex}"
+    region="ap-south-1"
     
 }
 resource "aws_s3_bucket_public_access_block" "public_access" {
