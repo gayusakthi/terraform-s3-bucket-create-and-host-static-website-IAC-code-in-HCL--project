@@ -3,34 +3,40 @@ pipeline {
 
     stages {
 
-        stage('pull code from github') {
+        stage('Pull Code from GitHub') {
             steps {
                 git branch: 'master',
                     url: 'https://github.com/gayusakthi/terraform-s3-bucket-create-and-host-static-website-IAC-code-in-HCL--project.git'
             }
         }
 
-        stage('terraform init and apply') {
+        stage('Terraform Init, Validate, Plan and Apply') {
             steps {
-                sh 'terraform init'
-                sh 'terraform validate'
-                sh 'terraform plan'
-                sh 'terraform apply -auto-approve'
+                sh '''
+                    set -e
+
+                    terraform init
+                    terraform validate
+                    terraform plan
+                    terraform apply -auto-approve
+                '''
             }
         }
 
-        stage('upload files to s3 bucket') {
+        stage('Upload Website Files to S3') {
             steps {
                 sh '''
-                BUCKET_NAME=$(terraform output -raw name | cut -d'.' -f1)
+                    set -e
 
-                aws s3 sync ./ s3://$BUCKET_NAME \
-                  --exclude ".git/*" \
-                  --exclude ".terraform/*" \
-                  --exclude "*.tf" \
-                  --exclude "*.hcl" \
-                  --exclude "Jenkinsfile" \
-                  --exclude "*.md"
+                    BUCKET_NAME=$(terraform output -raw name | cut -d'.' -f1)
+
+                    aws s3 sync ./ s3://$BUCKET_NAME \
+                        --exclude ".git/*" \
+                        --exclude ".terraform/*" \
+                        --exclude "*.tf" \
+                        --exclude "*.hcl" \
+                        --exclude "Jenkinsfile" \
+                        --exclude "*.md"
                 '''
             }
         }
@@ -38,13 +44,20 @@ pipeline {
 
     post {
         success {
-            echo 'static website deployment successful'
-            sh 'terraform output -raw name'
+            echo 'Static website deployment successful'
+
+            sh '''
+                echo "Website Bucket:"
+                terraform output -raw name
+            '''
         }
 
         failure {
-            echo 'static website deployment failure'
+            echo 'Static website deployment failed'
+        }
+
+        always {
+            cleanWs()
         }
     }
 }
-
